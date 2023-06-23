@@ -1,5 +1,6 @@
 #include "data_structure.h"
 #include "matrix_multiplication.cu"
+#include "utility.cpp"
 
 template <class T> constexpr T ceiling_div(T a, T b) { return (a + b - 1) / b; }
 
