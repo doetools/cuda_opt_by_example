@@ -1,31 +1,29 @@
 #include "data_structure.h"
+#include "matrix_multiplication.cu"
 
-// T const* a should not be confused with T* const a
-// the first one says T is a constant while the second one says
-// the pointer is a constant
-// ALWAYS READ BACKWARD (<---), i.e., float const *, reads
-// a pointer to a constant float
-template <class T, size_t block_size=32>
-__global__ void dumb_kernel(float const *a, const int N)
-{
-    size_t gid{blockIdx.x * blockDim.x + threadIdx.x};
-    if (gid < N)
-        printf("the value is %f\n", a[gid]);
-}
+template <class T> constexpr T ceiling_div(T a, T b) { return (a + b - 1) / b; }
 
+int main() {
+  const size_t M{1 << 5};
+  const size_t N{1 << 5};
+  const size_t WARP_SIZE{32};
 
-int main()
-{
-    DataBuffer<FLOAT> a = DataBuffer<FLOAT>(5, 5);
+  DataBuffer<FLOAT> a = DataBuffer<FLOAT>(M, N);
+  DataBuffer<FLOAT> b = DataBuffer<FLOAT>(N, M);
+  DataBuffer<FLOAT> c = DataBuffer<FLOAT>(M, M, false);
 
-    dim3 const blocks{32};
-    dim3 const grids{1};
+  dim3 const blocks{WARP_SIZE, WARP_SIZE};
+  dim3 const grids{ceiling_div<size_t>(M, WARP_SIZE),
+                   ceiling_div<size_t>(M, WARP_SIZE)};
 
-    dumb_kernel<FLOAT><<<grids, blocks>>>(a.d_data, a.size);
+  matrix_multiplication_noncoalesce<FLOAT>
+      <<<grids, blocks>>>(a.d_data, b.d_data, c.d_data, M, N);
 
-    // std::cout << a.c_data.size() << std::endl;
-    // for (auto i : a.c_data)
-    //     std::cout << a.size << std::endl;
+  c.copy_to_host();
 
-    return 0;
+  vector<FLOAT> c_ref = matrix_multiplication<FLOAT>(a.c_data, b.c_data, M, M);
+
+  cout << max_difference(c_ref, c.c_data) << endl;
+
+  return 0;
 }

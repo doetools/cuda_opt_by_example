@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <cstdlib>        // random number generator
 #include <cuda_runtime.h> // cuda runtime
 
@@ -24,10 +25,10 @@ public:
 
     // add a constructor
     // use the initializer list
-    DataBuffer(int num_row = 1, int num_col = 1) : m(num_row), n(num_col)
+    DataBuffer(int num_row = 1, int num_col = 1, bool randomized = true) : m(num_row), n(num_col)
     {
         // populate the data c
-        populate_vector();
+        populate_vector(randomized);
 
         // create device data
         create_device_buffer();
@@ -45,15 +46,22 @@ public:
     }
 
 private:
-    int populate_vector(int amplifier = 5)
+    int populate_vector(bool randomized = true)
     {
+        T entry;
+
         // seed 100, to avoid change over multiple runs
         srand(100);
 
         // populate the vector
         for (int i = 0; i < m * n; i++)
         {
-            c_data.push_back(T(rand() * amplifier) / T(RAND_MAX));
+            if (randomized)
+                entry = T(rand() * 5) / T(RAND_MAX);
+            else
+                entry = T(0);
+
+            c_data.push_back(entry);
         }
 
         return 0;
@@ -65,6 +73,7 @@ private:
         return 0;
     }
 
+public:
     int copy_to_device()
     {
         cudaMemcpy(d_data, c_data.data(), size * sizeof(T), cudaMemcpyHostToDevice);
