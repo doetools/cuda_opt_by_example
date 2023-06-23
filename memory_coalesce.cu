@@ -3,7 +3,9 @@
 // T const* a should not be confused with T* const a
 // the first one says T is a constant while the second one says
 // the pointer is a constant
-template <class T>
+// ALWAYS READ BACKWARD (<---), i.e., float const *, reads
+// a pointer to a constant float
+template <class T, size_t block_size=32>
 __global__ void dumb_kernel(float const *a, const int N)
 {
     size_t gid{blockIdx.x * blockDim.x + threadIdx.x};
