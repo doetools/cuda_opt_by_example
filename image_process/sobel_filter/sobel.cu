@@ -24,15 +24,6 @@ public:
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < width; j++) {
         for (int k = 0; k < CHANNEL_NUM; k++) {
-          if (k == 3)
-            rgb_image[i * width * CHANNEL_NUM + j * CHANNEL_NUM + k] = 255;
-
-          if (k == 0)
-            rgb_image[i * width * CHANNEL_NUM + j * CHANNEL_NUM + k] = 100;
-
-          if (k == 1)
-            rgb_image[i * width * CHANNEL_NUM + j * CHANNEL_NUM + k] =
-                uint8_t(rand() / 255);
         }
       }
     }
