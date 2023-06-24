@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <functional>
 #include <cstdlib>        // random number generator
 #include <cuda_runtime.h> // cuda runtime
 
