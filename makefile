@@ -3,7 +3,7 @@
 
 
 ALL:
-	nvcc memory_coalesce.cu -o memory_coalesce  -Xptxas -O0
+	nvcc memory_coalesce.cu -o memory_coalesce  -Xptxas -O3
 	./memory_coalesce
 	rm memory_coalesce
 
