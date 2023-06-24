@@ -17,3 +17,6 @@ UTIL:
 	g++ utility.cpp -o utility
 	./utility
 	rm utility
+
+TMP:
+	g++ tmp.cpp -std=c++11 -I/home/sesa461392/.asdf/installs/python/3.7.4/include/python3.7m/ -I/home/sesa461392/Documents/Projects/ecostream/venv/lib/python3.7/site-packages/numpy/core/include -L/home/sesa461392/.asdf/installs/python/3.7.4/lib/

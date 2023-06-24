@@ -26,16 +26,18 @@ public:
 
     // add a constructor
     // use the initializer list
-    DataBuffer(int num_row = 1, int num_col = 1, bool randomized = true) : m(num_row), n(num_col)
+    DataBuffer(int num_row = 1, int num_col = 1, bool randomized = true, bool create_gpu_data = true) : m(num_row), n(num_col)
     {
         // populate the data c
         populate_vector(randomized);
 
-        // create device data
-        create_device_buffer();
+        if (create_gpu_data)
+        { // create device data
+            create_device_buffer();
 
-        // copy data to device
-        copy_to_device();
+            // copy data to device
+            copy_to_device();
+        }
     }
 
     // destructor
