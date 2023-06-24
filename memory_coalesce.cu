@@ -39,7 +39,7 @@ int main() {
 
   std::function<void(cudaStream_t)> const launch_shared_memory{
       [&](cudaStream_t stream) {
-        matrix_multiplication_shared_memory<FLOAT>
+        matrix_multiplication_shared_memory<FLOAT, WARP_SIZE>
             <<<grids, blocks, 0, stream>>>(a.d_data, b.d_data, c3.d_data, M, N);
       }};
 

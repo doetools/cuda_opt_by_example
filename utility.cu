@@ -2,8 +2,8 @@
 
 // template <class T>
 FLOAT measure_performance(std::function<void(cudaStream_t)> bound_function,
-                          cudaStream_t stream, int num_repeats = 100,
-                          int num_warmups = 100)
+                          cudaStream_t stream, int num_repeats = 10,
+                          int num_warmups = 10)
 {
     cudaEvent_t start, stop;
     FLOAT time;
