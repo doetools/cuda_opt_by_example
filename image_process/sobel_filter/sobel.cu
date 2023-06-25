@@ -4,7 +4,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 
-#include "../../cuda_opt_basics/data_structure.h"
+#include "../../cuda/data_structure.h"
 #include "../include/stb_image.h"
 #include "../include/stb_image_write.h"
 #include "sobel_kernel.cu"
@@ -80,7 +80,7 @@ public:
 
 int main() {
 
-  ImageIO<uint8_t> image_io = ImageIO<uint8_t>();
+  ImageIO<uint8_t> image_io = ImageIO<uint8_t>("greyscale.png");
 
   Image<uint8_t> image = Image<uint8_t>(image_io.width, image_io.height,
                                         image_io.channel, image_io.image);
@@ -95,6 +95,8 @@ int main() {
   N = image.width;
   M = image.height;
   K = image.channel;
+
+  cout << N << " " << M << " " << K << endl;
   dim3 const blocks{WARP_SIZE, WARP_SIZE, 1};
   dim3 const grids{
       ceiling_div<size_t>(N, WARP_SIZE),
