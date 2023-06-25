@@ -13,6 +13,9 @@
 
 using namespace std;
 
+template <class T>
+constexpr T ceiling_div(T a, T b) { return (a + b - 1) / b; }
+
 template <typename T>
 class DataBuffer
 {
@@ -70,13 +73,13 @@ private:
         return 0;
     }
 
+public:
     int create_device_buffer()
     {
         cudaMalloc(&d_data, size * sizeof(T));
         return 0;
     }
 
-public:
     int copy_to_device()
     {
         cudaMemcpy(d_data, c_data.data(), size * sizeof(T), cudaMemcpyHostToDevice);

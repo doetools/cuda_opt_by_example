@@ -1,10 +1,38 @@
-#include "../../cuda_opt_basics/data_structure.h"
-#include "../include/stb_image.h"
-#include "../include/stb_image_write.h"
+
 #include <stdint.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
+
+#include "../../cuda_opt_basics/data_structure.h"
+#include "../include/stb_image.h"
+#include "../include/stb_image_write.h"
+#include "sobel_kernel.cu"
+
+template <typename T> class ImageIO {
+public:
+  int width;
+  int height;
+  int channel;
+  T *image;
+
+  ImageIO(char *file_name = "original.png") { open(file_name); }
+
+  ~ImageIO() { stbi_image_free(image); }
+
+  int save(char *save_name, vector<T> image) {
+    stbi_write_png(save_name, width, height, channel, image.data(),
+                   width * channel);
+
+    return 0;
+  }
+
+  int open(char *file_name = "original.png") {
+    image = stbi_load(file_name, &width, &height, &channel, 3);
+
+    return 0;
+  }
+};
 
 template <typename T> class Image : public DataBuffer<T> {
 
@@ -48,27 +76,38 @@ public:
 
     return 0;
   }
-
-  int save(char *file_name = "image.png") {
-    create_image_data();
-
-    stbi_write_png(file_name, width, height, channel, image.data(),
-                   width * channel);
-
-    return 0;
-  }
 };
 
 int main() {
-  int width, height, bpp;
 
-  uint8_t *rgb_image = stbi_load("original.png", &width, &height, &bpp, 3);
+  ImageIO<uint8_t> image_io = ImageIO<uint8_t>();
 
-  Image<uint8_t> image(width, height, bpp, rgb_image);
+  Image<uint8_t> image = Image<uint8_t>(image_io.width, image_io.height,
+                                        image_io.channel, image_io.image);
+  //   create device memory and copy data
+  image.create_device_buffer();
+  image.copy_to_device();
 
-  stbi_image_free(rgb_image);
+  // create grid and blocks
+  const size_t WARP_SIZE{32};
+  size_t M, N, K;
 
-  image.save();
+  N = image.width;
+  M = image.height;
+  K = image.channel;
+  dim3 const blocks{WARP_SIZE, WARP_SIZE, 1};
+  dim3 const grids{
+      ceiling_div<size_t>(N, WARP_SIZE),
+      ceiling_div<size_t>(M, WARP_SIZE),
+      ceiling_div<size_t>(K, WARP_SIZE),
+  };
+
+  // run kernels
+  convolute<uint8_t><<<grids, blocks>>>(image.d_data);
+
+  // save figure
+  //   image.create_image_data();
+  //   image_io.save("new.png", image.image);
 
   return 0;
 }
