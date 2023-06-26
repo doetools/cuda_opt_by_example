@@ -121,13 +121,21 @@ int main() {
   // save figure
   new_img.copy_to_host();
 
-  std::ofstream outFile("edge_cuda.txt");
-  for (const uint8_t e : new_img.c_data) {
-    outFile << e << "\n";
-  }
+  // scale
+  // vector<FLOAT> &final_data = new_img.c_data;
+  // FLOAT max = *max_element(final_data.begin(), final_data.end());
+  // FLOAT min = *min_element(final_data.begin(), final_data.end());
+  // for_each(final_data.begin(), final_data.end(),
+  //          [max, min](FLOAT &i) { i = (i - min) / (max - min) * 255; });
 
   // convert data and export an image
   vector<uint8_t> new_image_data(new_img.c_data.begin(), new_img.c_data.end());
+
+  std::ofstream outFile("edge_cuda.txt");
+  for (auto e : new_image_data) {
+    outFile << int(e) << "\n";
+  }
+
   image_io.save("edge_cuda.png", new_image_data);
 
   return 0;

@@ -2,16 +2,11 @@
 from PIL import Image
 import numpy as np
 
+#%%
 img = Image.open("original.png").convert("L")
 original = np.asanyarray(img)
-ref = np.asanyarray(Image.open("edge.png").convert("L"))
-generate = np.fromfile("./new_img.txt", dtype=np.uint8)
-
-ref.shape
-original.shape
-
-print(original[:3][:3])
 # img.save("greyscale.png")
+
 # %%
 rows, columns = original.shape
 Gx = np.array([[1.0, 0.0, -1.0], [2.0, 0.0, -2.0], [1.0, 0.0, -1.0]])
@@ -29,8 +24,15 @@ for i in range(rows - 2):
 sobel_filtered_image = sobel_filtered_image.astype(dtype=np.uint8)
 new_img = Image.fromarray(sobel_filtered_image, "L")
 new_img.show()
-new_img.save("greyscale_py.png")
+new_img.save("edge_py.png")
 
 # %%
-sobel_filtered_image[1][1]
-# %%
+# read img data from cuda output and plot
+
+cuda_data = np.fromfile("./edge_cuda.txt", dtype=np.int32, sep="\n")
+print(cuda_data.max())
+cuda_data = cuda_data.reshape(original.shape)
+cuda_data = cuda_data.astype(np.uint8) + np.uint8(1)
+cuda_img = Image.fromarray(cuda_data, "L")
+cuda_img.show()
+cuda_img.save("edge_cuda.png")
