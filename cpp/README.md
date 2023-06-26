@@ -212,6 +212,7 @@ class Dog: public Animal{
     // overwrite the non-virutal function won't work
 
     // optional we can overwrite virutal function
+    // this is called run-time binding
     void bark()
     {
         cout << "i am a dog" << endl;
@@ -225,3 +226,118 @@ class Dog: public Animal{
 }
 
 ```
+
+9. Pass a function as input argument for another function. This normally happens when a uniform interface is needed to perform some tests, for example, measuring the execution speed of a few functions.
+
+The first way is like `C`, which is to pass the function by its pointer (`f` or `&f`). The second way is to pass the function as an object using `std::function`.
+
+```cpp
+#include <iostream>
+#include <functional>
+using namespace std;
+
+int add(int &a, int &b)
+{
+    return a + b;
+}
+
+int multiply(int &a, int &b)
+{
+    return a * b;
+}
+
+typedef int (*FUNC_TYPE)(int &, int &);
+// this is equivalent to int (*f)(int &, int &)
+int pass_fn_pointer(FUNC_TYPE f, int &a, int &b)
+{
+    cout << f(a, b) << endl;
+    return 0;
+}
+
+// use std::function
+int pass_fn_object(function<int(int &, int &)> f, int &a, int &b)
+{
+    cout << f(a, b) << endl;
+    return 0;
+}
+
+int main()
+{
+    int a = 1;
+    int b = 2;
+
+    // parsing &f or f is the same thing
+    pass_fn_pointer(&multiply, a, b);
+    pass_fn_object(&add, a, b);
+}
+```
+
+10. Function binding.
+
+```cpp
+
+```
+
+11. Static memory and dynamic memory. Any memory allocations done by `allocate` or `new` are dynamic and thus saved in HEAP (v.s. STACK). When not needed, all dynamically allocated memories have to be released by using `free` or `delete`. A carvet is that for array-like object, `delete []` needed to be used in lieu of `delete`.
+
+An important thing to remember is that memory allocation could be hierarchical, as illustrated below. Too much memory management could be a headache, especially with a vector of pointers. Then, people started to using some kinds of enhanced pointers, like, `boost::shared_array`.
+
+```cpp
+// a vector container that store 10 int pointer
+vector<int *> data(10, NULL);
+// populate, so that vector stores 10 10 elememnt array
+for_each(data.begin(),data.end(),[](int* i){
+    i = new array[10];
+})
+// a naive of vector.clear wont do the job
+// as this will only destroy the pointer
+data.clear()
+
+// instead, will have to destroy array by array
+for_each(data.begin(),data.end(),[](int* i){
+    delete [] i;
+})
+
+// you can then empty the vector using the swap technique
+vector<int *>().swap(data)
+
+```
+
+So, do not make an object too deep or pointer-based... that will not work well from the memory management standpoint of view.
+
+```cpp
+
+
+```
+
+12. Relating to **11**, use smart pointers, like `unique_ptr`, `shared_ptr`.
+
+```cpp
+#include <vector>
+#include <iostream>
+#include <memory>
+
+struct T
+{
+    T(int n) :x(n) {};
+    int print() { return x; };
+private:
+    int x;
+};
+
+int main(int argv, char** argc)
+{
+    std::vector<std::unique_ptr<T>> t;
+    t.push_back(std::make_unique<T>(1));
+    t.push_back(std::make_unique<T>(2));
+    std::cout << t.size() << std::endl;
+    std::cout << t.back()->print() << std::endl;
+    t.pop_back();
+    std::cout << t.size() << std::endl;
+    std::cout << t.back()->print() << std::endl;
+    return 0;
+}
+
+```
+
+13. To supercede the point 12, try not using raw pointer. Otherwise, you are at the mercy of [RULE OF THREE](https://stackoverflow.com/questions/4172722/what-is-the-rule-of-three)
