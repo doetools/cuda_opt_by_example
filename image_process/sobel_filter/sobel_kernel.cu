@@ -32,6 +32,9 @@ __global__ void sobel_convolute_naive(const T *img, T *new_img, const size_t M,
   // a 32+2 by 32+2 tile
   __shared__ T img_tile[WARP_SIZE + 2][WARP_SIZE + 2];
 
+  if (gi > M || gj > N)
+    return;
+
   // read data to shared memory
   img_tile[i + 1][j + 1] = img[gi * N + gj];
 
@@ -109,8 +112,4 @@ __global__ void sobel_convolute_naive(const T *img, T *new_img, const size_t M,
 
   // save result to new_img of M-2 by N-2
   new_img[gi * N + gj] = sqrtf(total_x * total_x + total_y * total_y);
-
-  if (gi == 1 && gj == 1) {
-    printf("final: %f\n", sqrtf(total_x * total_x + total_y * total_y));
-  }
 }
