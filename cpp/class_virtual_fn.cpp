@@ -17,7 +17,9 @@ public:
 class Dog : public Animal
 {
 public:
-    void bark()
+    // override is used here for clarity
+    // it is not necessary
+    void bark() override
     {
         cout << "i am a dog" << endl;
     }
