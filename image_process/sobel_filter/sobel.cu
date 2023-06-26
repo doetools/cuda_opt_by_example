@@ -8,6 +8,7 @@
 #include "../include/stb_image.h"
 #include "../include/stb_image_write.h"
 #include "sobel_kernel.cu"
+#include <fstream>
 
 template <typename T> class ImageIO {
 public:
@@ -28,7 +29,7 @@ public:
   }
 
   int open(char *file_name = "original.png") {
-    image = stbi_load(file_name, &width, &height, &channel, 3);
+    image = stbi_load(file_name, &width, &height, &channel, 1);
 
     return 0;
   }
@@ -82,21 +83,30 @@ int main() {
 
   ImageIO<uint8_t> image_io = ImageIO<uint8_t>("greyscale.png");
 
-  Image<uint8_t> image = Image<uint8_t>(image_io.width, image_io.height,
-                                        image_io.channel, image_io.image);
+  //   Image<uint8_t> image = Image<uint8_t>(image_io.width, image_io.height,
+  //                                         image_io.channel, image_io.image);
+
+  const size_t N{image_io.width};
+  const size_t M{image_io.height};
+  const size_t K{image_io.channel};
+
+  // create buffer
+  DataBuffer<FLOAT> img = DataBuffer<FLOAT>(M, N, false, false);
+  DataBuffer<FLOAT> new_img = DataBuffer<FLOAT>(M, N, false, true);
+
+  // write data to img
+  for (int i = 0; i < img.c_data.size(); i++) {
+    img.c_data[i] = FLOAT(image_io.image[i]);
+  }
+
   //   create device memory and copy data
-  image.create_device_buffer();
-  image.copy_to_device();
+  img.create_device_buffer();
+  img.copy_to_device();
 
   // create grid and blocks
   const size_t WARP_SIZE{32};
-  size_t M, N, K;
 
-  N = image.width;
-  M = image.height;
-  K = image.channel;
-
-  cout << N << " " << M << " " << K << endl;
+  // set block and dimension sizes
   dim3 const blocks{WARP_SIZE, WARP_SIZE, 1};
   dim3 const grids{
       ceiling_div<size_t>(N, WARP_SIZE),
@@ -105,11 +115,20 @@ int main() {
   };
 
   // run kernels
-  convolute<uint8_t><<<grids, blocks>>>(image.d_data);
+  sobel_convolute_naive<FLOAT>
+      <<<grids, blocks>>>(img.d_data, new_img.d_data, M, N);
 
   // save figure
-  //   image.create_image_data();
-  //   image_io.save("new.png", image.image);
+  new_img.copy_to_host();
+
+  std::ofstream outFile("edge_cuda.txt");
+  for (const uint8_t e : new_img.c_data) {
+    outFile << e << "\n";
+  }
+
+  // convert data and export an image
+  vector<uint8_t> new_image_data(new_img.c_data.begin(), new_img.c_data.end());
+  image_io.save("edge_cuda.png", new_image_data);
 
   return 0;
 }
