@@ -183,4 +183,45 @@ int main(){
 
 ```
 
-8. Virtual function and pure virtual function can be defined in base class and overwritten (by in-time binding ) in derived class. Unlike the pure virtual function, the virtual function has to be **declared** and **defined**.
+8. Virtual function and pure virtual function can be defined in base class and overwritten (by in-time binding ) in derived class. Unlike the pure virtual function which only needs to be **declared**, the virtual function has to be **declared** and **defined**.
+
+Check out the [example]("./virtual_fn.cpp");
+
+```cpp
+
+class Animal {
+    public:
+        // bark is a virtual function
+        // virtual bark(); will not work
+        // as it does not provide the definition.
+        virtual void bark(){
+            cout << "i am an animal" <<endl;
+        }
+
+        // get_legs is a pure virtual function
+        // which makes Animal an abstract class
+        // the derived class will continue to be
+        // an abstract class unless it completes
+        // the definition/implementation of get_legs.
+        virtual void get_legs() const=0;
+}
+
+class Dog: public Animal{
+    ...
+
+    // overwrite the non-virutal function won't work
+
+    // optional we can overwrite virutal function
+    void bark()
+    {
+        cout << "i am a dog" << endl;
+    }
+
+    // use override to overwrite the pure virtual function
+    virtual void get_legs() const override
+    {
+        cout << "i have 4 legs" << endl;
+    }
+}
+
+```
