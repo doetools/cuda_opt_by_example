@@ -2,7 +2,7 @@
 
    Checkthis [blog](https://c-faq.com/decl/spiral.anderson.html) and this [stackoverflow answer](https://stackoverflow.com/questions/1143262/what-is-the-difference-between-const-int-const-int-const-and-int-const#:~:text=So%20in%20your%20question%2C%20%22int,to%20the%20thing%20after%20it.).
 
-```cpp
+```
 //READ BACKWARD! THAT IS THE KEY.
 float const * -> a pointer to constant float
 const float * -> same as the first one
@@ -156,3 +156,31 @@ int& add_one(int& a){
               // won't work.
 }
 ```
+
+7. A member function prefixed with `static` can be called without instantiating the class. The prefix `static` indicates that class is only a scope resolution. Broadly, a function prefixed with `static` or placed with an unamed namepsace is only by functions in THE file.
+
+```cpp
+using namespace std;
+class Foo{
+    ...
+
+    static void print(int a){
+        cout << a << endl;
+    }
+}
+
+// fn_1 and fn_2 are only accessible in the file
+// or the translation unit as opposed to every translation unit
+static void fn_1();
+namespace {
+    void fn_2();
+}
+
+int main(){
+    int a = 1;
+    Foo::print(a);
+}
+
+```
+
+8. Virtual function and pure virtual function can be defined in base class and overwritten (by in-time binding ) in derived class. Unlike the pure virtual function, the virtual function has to be **declared** and **defined**.
