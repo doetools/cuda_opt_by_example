@@ -29,27 +29,62 @@ __global__ void sobel_convolute_naive(const T *img, T *new_img, const size_t M,
   int KERNEL_SIZE{3};
   int KERNEL_LEN{9};
 
-  // a 32 by 32 tile
+  // a 32+2 by 32+2 tile
   __shared__ T img_tile[WARP_SIZE + 2][WARP_SIZE + 2];
 
   // read data to shared memory
-  // there are 2 rows/columns of overlapping between two tiles
-  if (blockIdx.x == 0)
-    img_tile[i][j] = img[gi * N + gj];
-  else
-    img_tile[i][j] = img[gi * N + gj - 2];
+  img_tile[i + 1][j + 1] = img[gi * N + gj];
 
-  if (blockIdx.y == 0)
-    img_tile[i][j] = img[gi * N + gj];
-  else
-    img_tile[i][j] = img[(gi - 1) * N + gj];
+  // read left
+  if (blockIdx.x != 0) {
+    if (j == 0)
+      img_tile[i + 1][j] = img[gi * N + gj - 1];
+  }
+
+  // read right
+  if (blockIdx.x != gridDim.x - 1)
+    if (j == WARP_SIZE - 1)
+      img_tile[i + 1][j + 2] = img[gi * N + gj + 1];
+
+  // read bottom
+  if (blockIdx.y != 0) {
+    if (i == 0)
+      img_tile[i][j + 1] = img[(gi - 1) * N + gj];
+  }
+
+  // read top
+  if (blockIdx.y != gridDim.y - 1) {
+    if (i == WARP_SIZE - 1)
+      img_tile[i + 2][j + 1] = img[(gi + 1) * N + gj];
+  }
+
+  // four corners
+  if (i == 0 && j == 0) {
+    if ((gi - 1) > 0 && (gj - 1) > 0) {
+      img_tile[0][0] = img[(gi - 1) * N + gj - 1];
+    }
+  }
+  if (i == 0 && j == WARP_SIZE - 1) {
+    if ((gi - 1) > 0 && (gj + 1) < N) {
+
+      img_tile[0][WARP_SIZE + 1] = img[(gi - 1) * N + gj + 1];
+    }
+  }
+  if (i == WARP_SIZE - 1 && j == 0) {
+    if ((gi + 1) < M && (gj - 1) > 0) {
+
+      img_tile[WARP_SIZE + 1][0] = img[(gi + 1) * N + gj - 1];
+    }
+  }
+  if (i == WARP_SIZE - 1 && j == WARP_SIZE - 1) {
+    if ((gi + 1) < M && (gj + 1) < N) {
+      img_tile[WARP_SIZE + 1][WARP_SIZE + 1] = img[(gi + 1) * N + gj + 1];
+    }
+  }
 
   __syncthreads();
 
-  // skip the threads on the boundary
-  if (i == 0 || i == WARP_SIZE - 1)
-    return;
-  if (j == 0 || j == WARP_SIZE - 1)
+  if (gi == 0 || gi >= M - 1 || gj == 0 || gj >= N - 1)
     return;
 
   // calculate sobel
@@ -60,7 +95,7 @@ __global__ void sobel_convolute_naive(const T *img, T *new_img, const size_t M,
   for (index = 0; index < KERNEL_LEN; index++) {
     increment_i = index / KERNEL_SIZE;
     increment_j = index % KERNEL_SIZE;
-    total_x += img_tile[i - 1 + increment_i][j - 1 + increment_j] *
+    total_x += img_tile[i + increment_i][j + increment_j] *
                KERNEL_X[KERNEL_LEN - 1 - index];
   }
 
@@ -68,10 +103,14 @@ __global__ void sobel_convolute_naive(const T *img, T *new_img, const size_t M,
   for (index = 0; index < KERNEL_LEN; index++) {
     increment_i = index / KERNEL_SIZE;
     increment_j = index % KERNEL_SIZE;
-    total_y += img_tile[i - 1 + increment_i][j - 1 + increment_j] *
+    total_y += img_tile[i + increment_i][j + increment_j] *
                KERNEL_Y[KERNEL_LEN - 1 - index];
   }
 
   // save result to new_img of M-2 by N-2
   new_img[gi * N + gj] = sqrtf(total_x * total_x + total_y * total_y);
+
+  if (gi == 1 && gj == 1) {
+    printf("final: %f\n", sqrtf(total_x * total_x + total_y * total_y));
+  }
 }

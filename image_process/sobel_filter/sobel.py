@@ -42,13 +42,17 @@ cuda_img.save("edge_cuda.png")
 cuda = cuda_data.astype(np.int32)
 py = sobel_filtered_image.astype(np.int32)
 
-diff = cuda - py
+for i in cuda:
+    if i == 0:
+        print(i)
 
-M, N = diff.shape
+# diff = cuda - py
 
-for i in range(M):
-    for j in range(N):
-        if diff[i, j] >= 55:
-            print(i, j, cuda[i, j], py[i, j])
+# M, N = diff.shape
+
+# for i in range(M):
+#     for j in range(N):
+#         if diff[i, j] >= 55:
+#             print(i, j, cuda[i, j], py[i, j])
 
 # %%
