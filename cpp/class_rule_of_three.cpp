@@ -52,6 +52,7 @@ public:
     Foo(const Foo &that);
 
     // overaloding assignment operator
+    // check out class_overload_operator.cpp
     Foo &operator=(const Foo &that)
     {
         this->n = that.n;

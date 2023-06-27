@@ -359,4 +359,42 @@ f();
 
 ```
 
-15. Overlopping, not only for functions, but also for operators (within class).
+15. Overlopping, not only for functions, but also for operators (within class). The class operator overloading can be global scope and class (member) scope. Class scope operator overloadig is only good for operations started with LHS of the operator being the class type; otherwise, a global operator overloading is needed. Operator `=` is inherently class scope.
+
+```cpp
+
+// simple function overloading
+
+int print (int a){
+    cout << "integet: "<<  a << endl;
+}
+
+int print (float a){
+    cout << "float: "<< a << endl;
+}
+
+print (5); // calls the first print
+print (5.0); // class the second print
+
+
+class Foo{
+    public:
+        int a = 5;
+
+    Foo(){}
+
+
+    // member operator overloading
+    // good for Foo + x
+    // not food for x + Foo
+    Foo operator+(int &x){
+        return Foo(x+this->a);
+    }
+}
+// global operator overloading
+// good for x + food
+Foo operator+(int &x, Foo &that){
+    return Foo(x+that.a);
+}
+
+```
