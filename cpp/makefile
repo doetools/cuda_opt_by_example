@@ -3,6 +3,6 @@ HELP:
 
 FILE_NAME := $(file_name)
 RUN: 
-	@g++ $(FILE_NAME) -O3
+	@g++ $(FILE_NAME) -O3 -std=c++11
 	@./a.out
 	@rm a.out
