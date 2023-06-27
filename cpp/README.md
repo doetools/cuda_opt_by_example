@@ -341,3 +341,22 @@ int main(int argv, char** argc)
 ```
 
 13. To supercede the point 12, try not using raw pointer. Otherwise, you are at the mercy of [RULE OF THREE](https://stackoverflow.com/questions/4172722/what-is-the-rule-of-three)
+14. Return/access a local variable or its pointer or reference outside the (fn) scope will cause undefined bevavior.
+
+```cpp
+
+int foo(){
+    int a = 0;
+
+    return [&a](){
+        cout << a << end;
+    }
+}
+
+// this will print 0
+auto f = foo();
+f();
+
+```
+
+15. Overlopping, not only for functions, but also for operators (within class).
