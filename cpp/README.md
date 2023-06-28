@@ -341,10 +341,10 @@ int main(int argv, char** argc)
 ```
 
 13. To supercede the point 12, try not using raw pointer. Otherwise, you are at the mercy of [RULE OF THREE](https://stackoverflow.com/questions/4172722/what-is-the-rule-of-three)
-14. Return/access a local variable or its pointer or reference outside the (fn) scope will cause undefined bevavior.
+14. Access a local variable by its pointer or reference outside the (fn) scope will cause undefined bevavior. If a local vairable needs to be return, then return its value.
 
 ```cpp
-
+// would fail
 int foo(){
     int a = 0;
 
@@ -353,7 +353,16 @@ int foo(){
     }
 }
 
-// this will print 0
+// would succeed
+int foo_good(){
+    int a = 0;
+
+    return [=a](){
+        cout << a << end;
+    }
+}
+
+// accessing a free memory is undefined behavior
 auto f = foo();
 f();
 
@@ -396,5 +405,37 @@ class Foo{
 Foo operator+(int &x, Foo &that){
     return Foo(x+that.a);
 }
+
+```
+
+16. ellipsis in function/class template parameter. When put to the left of the parameter, it indicates a pack. When put to the right of the parameter, it indicates an expansion. This [link](https://learn.microsoft.com/en-us/cpp/cpp/ellipses-and-variadic-templates?view=msvc-170) has a good introduction.
+
+```cpp
+
+
+```
+
+16. Weird terminologies and their counterpart (less weird).
+    `lvalue` -- locator value, named variable with identifiable address
+    `rvalue`-- opposite of `lvalue`, unnamed objects, like constant 5
+    `&` -- reference of `lvalue`
+    `&&` -- reference of `rvalue`
+    `*` -- pointer of `lvalue` that can be obtained using operator `&`
+
+```cpp
+int a; // lvalue
+a = 5; // 5 is rvalue (unnamed)
+        // illegal &(5)
+
+// expect the reference to a rvalue
+void print (int && x){
+    cout << x<< endl;
+}
+
+// good
+print(5);
+
+// not good
+print (a);
 
 ```
