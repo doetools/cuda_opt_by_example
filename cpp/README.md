@@ -408,14 +408,14 @@ Foo operator+(int &x, Foo &that){
 
 ```
 
-16. ellipsis in function/class template parameter. When put to the left of the parameter, it indicates a pack. When put to the right of the parameter, it indicates an expansion. This [link](https://learn.microsoft.com/en-us/cpp/cpp/ellipses-and-variadic-templates?view=msvc-170) has a good introduction.
+16. Ellipsis `...` in function/class template parameter. When put to the left of the parameter, it indicates a pack. When put to the right of the parameter, it indicates an expansion. This [link](https://learn.microsoft.com/en-us/cpp/cpp/ellipses-and-variadic-templates?view=msvc-170) has a good introduction.
 
 ```cpp
 
 
 ```
 
-16. Weird terminologies and their counterpart (less weird).
+17. Weird terminologies and their counterpart (less weird).
     `lvalue` -- locator value, named variable with identifiable address
     `rvalue`-- opposite of `lvalue`, unnamed objects, like constant 5
     `&` -- reference of `lvalue`
@@ -437,5 +437,14 @@ print(5);
 
 // not good
 print (a);
+
+```
+
+18. Initializer list `{}` is iterable.
+
+```cpp
+
+for (auto & i : {1,2,4})
+    cout <<i <<endl;
 
 ```
