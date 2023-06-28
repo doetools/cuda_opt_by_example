@@ -420,7 +420,7 @@ Foo operator+(int &x, Foo &that){
     `rvalue`-- opposite of `lvalue`, unnamed objects, like constant 5
     `&` -- reference of `lvalue`
     `&&` -- reference of `rvalue`
-    `*` -- pointer of `lvalue` that can be obtained using operator `&`
+    `*` -- pointer of `lvalue` that can be obtained using operator `&` (NOT ALL AMPERSANDS ARE CREATED EQUAL...not to be confused by the reference symbol `&`)
 
 ```cpp
 int a; // lvalue
